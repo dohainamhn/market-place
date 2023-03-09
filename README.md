@@ -1,4 +1,4 @@
-# OpenStore Smart Contract
+# OpenStore and MarketPlace Smart Contract
 
 ## Project Guides
 
