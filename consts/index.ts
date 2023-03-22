@@ -1,9 +1,9 @@
 export const CollectionName = 'OpenStore collection';
 export const CollectionSymbol = 'OpenStore';
 export const TemplateUri =
-  ' https://testnets-api.opensea.io/api/v1/metadata/0xf4910c763ed4e47a585e2d34baa9a4b611ae448c/0x{id}';
+  'https://testnets-api.opensea.io/api/v1/metadata/0xf4910c763ed4e47a585e2d34baa9a4b611ae448c/0x{id}';
 export const EIP712DomainName = 'Contract Verify';
-export const DefaultExpiredSigTime = 120;
+export const DefaultExpiredSigTime = 3600;
 
 export const EIP712OfferTypes = {
   EIP712Domain: [

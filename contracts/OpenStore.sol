@@ -85,6 +85,10 @@ contract OpenStore is ERC1155Upgradeable, ReentrancyGuardUpgradeable, OwnableUpg
         _tokenURI[_id] = _uri;
     }
 
+    function setTemPlateUri(string memory _uri) external onlyOwner {
+        templateURI = _uri;
+    }
+
     function uri(uint256 _id) public view override returns (string memory) {
         string memory tokenUri = _tokenURI[_id];
         if (bytes(tokenUri).length != 0) {

@@ -19,6 +19,7 @@ interface Params {
     verifyingContract: string;
   };
   message: {
+    orderId: string,
     nftId: string;
     collectionAddress: string;
     nftAmount: string;

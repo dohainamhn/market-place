@@ -5,10 +5,9 @@ import '@openzeppelin/contracts/token/ERC721/IERC721.sol';
 import '@openzeppelin/contracts/token/ERC20/IERC20.sol';
 import '@openzeppelin/contracts/token/ERC1155/IERC1155.sol';
 import './OpenStore.sol';
-import '@openzeppelin/contracts-upgradeable/token/ERC20/ERC20Upgradeable.sol';
 import '@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol';
 
-contract Marketplace is ERC20Upgradeable, OwnableUpgradeable {
+contract Marketplace is OwnableUpgradeable {
     struct EIP712Domain {
         string name;
         string version;
@@ -45,10 +44,8 @@ contract Marketplace is ERC20Upgradeable, OwnableUpgradeable {
 
     event ExecutedOffer(uint256 offerId);
     event ExecutedOrder(uint256 orderId);
-    function initialize(
-        string memory domain,
-        uint256 expiredTime
-    ) public initializer {
+
+    function initialize(string memory domain, uint256 expiredTime) public initializer {
         EXPIRED_TIME = expiredTime;
         __Ownable_init();
 
@@ -56,7 +53,7 @@ contract Marketplace is ERC20Upgradeable, OwnableUpgradeable {
             EIP712Domain({name: domain, version: '1', chainId: block.chainid, verifyingContract: address(this)})
         );
     }
-    
+
     function acceptERC1155Offer(Offer calldata _offer, uint8 v, bytes32 r, bytes32 s) external {
         require(!expiredOffers[_offer.offerId], 'Expired Offer');
         require(verify(_offer, owner(), v, r, s), 'wrong signature');
@@ -102,7 +99,7 @@ contract Marketplace is ERC20Upgradeable, OwnableUpgradeable {
         require(_order.buyer == _msgSender(), 'Not allow to call');
         require(block.timestamp <= _order.timestamp + EXPIRED_TIME, 'Deadline reached');
         // proxyTransfer(_order.seller, _order.buyer, _order.nftId, _order.nftAmount, '0x');
-          IERC1155(_order.collectionAddress).safeTransferFrom(
+        IERC1155(_order.collectionAddress).safeTransferFrom(
             _order.seller,
             _order.buyer,
             _order.nftId,
@@ -119,7 +116,7 @@ contract Marketplace is ERC20Upgradeable, OwnableUpgradeable {
         require(verifyOrder(_order, owner(), v, r, s), 'wrong signature');
         require(_order.buyer == _msgSender(), 'Not allow to call');
         require(block.timestamp <= _order.timestamp + EXPIRED_TIME, 'Deadline reached');
-        IERC721(_order.collectionAddress).safeTransferFrom(_order.seller, _order.buyer, _order.nftId, '0x');      
+        IERC721(_order.collectionAddress).safeTransferFrom(_order.seller, _order.buyer, _order.nftId, '0x');
         _order.seller.transfer(_order.ethAmount);
         expiredOffers[_order.orderId] = true;
         emit ExecutedOrder(_order.orderId);
@@ -182,14 +179,18 @@ contract Marketplace is ERC20Upgradeable, OwnableUpgradeable {
                 )
             );
     }
-    function verify(Offer memory offer, address sender, uint8 v, bytes32 r, bytes32 s) internal view returns (bool) {
+
+    function verify(Offer memory offer, address sender, uint8 v, bytes32 r, bytes32 s) public view returns (bool) {
         bytes32 digest = keccak256(abi.encodePacked('\x19\x01', DOMAIN_SEPARATOR, hashOffer(offer)));
         return ecrecover(digest, v, r, s) == sender;
     }
 
-    function verifyOrder(Order memory order, address sender, uint8 v, bytes32 r, bytes32 s) internal view returns (bool) {
+    function verifyOrder(Order memory order, address sender, uint8 v, bytes32 r, bytes32 s) public view returns (bool) {
         bytes32 digest = keccak256(abi.encodePacked('\x19\x01', DOMAIN_SEPARATOR, hashOrder(order)));
         return ecrecover(digest, v, r, s) == sender;
     }
 
+    function ChangeExpiredTime(uint256 _seconds) external {
+        EXPIRED_TIME = _seconds;
+    }
 }
